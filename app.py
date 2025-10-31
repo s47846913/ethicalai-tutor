@@ -7,12 +7,25 @@ from safety import basic_screen  # Import safety screening to ensure ethical res
 from lessons import LESSONS  # Import mini-lessons content for educational purposes
 from logging_utils import log_event  # Import logging utility for tracking interactions
 
+####################################################################
+# Initialize Streamlit page configuration for usability and clarity
+# This sets the page title, icon, and layout to enhance user experience
+####################################################################
 st.set_page_config(page_title="EthicalAI Tutor", page_icon="🤖", layout="centered")  # Configure Streamlit page with title, icon, and layout
 
+####################################################################
+# Render the main interface components including title, caption,
+# and options for explanation to promote transparency and user control
+####################################################################
 st.title("🤖 EthicalAI Tutor")  # Display main title of the app
 st.caption("Level 6 project — Generative AI educational chatbot for HCAI")  # Caption describing the app's educational purpose
 explain = st.checkbox("Explain steps (high-level rationale)", value=True)  # Checkbox for enabling explanation of AI reasoning (HCAI clarity)
 
+####################################################################
+# Sidebar provides contextual information, scenario ideas, reflection
+# templates, mini-lessons, and model info to support user education
+# and promote accountability and informed engagement with the AI
+####################################################################
 with st.sidebar:  # Sidebar for additional info and controls
     st.subheader("About")  # Sidebar section header
     st.write(
@@ -40,14 +53,26 @@ with st.sidebar:  # Sidebar for additional info and controls
     st.write(os.getenv("OPENAI_MODEL", "gpt-4o-mini"))  # Display current model from environment or default
     st.markdown("Set in `.env` → `OPENAI_MODEL`.")  # Instruction for changing model via environment variable
 
+####################################################################
+# Initialize or retrieve chat history from Streamlit session state
+# to maintain conversational context and support accountability
+####################################################################
 if "history" not in st.session_state:  # Initialize chat history in session state if not present
     st.session_state.history = []  # Empty list to store conversation turns
 
+####################################################################
+# Display the chat conversation history to ensure transparency 
+# and continuity in the user-AI interaction
+####################################################################
 # Chat window
 for m in st.session_state.history:  # Iterate through chat history messages
     with st.chat_message(m["role"]):  # Display each message with correct role (user/assistant)
         st.markdown(m["content"])  # Render message content in markdown
 
+####################################################################
+# Handle new user input with safety screening to uphold ethical
+# standards and prevent harmful or unethical interactions
+####################################################################
 user_text = st.chat_input("Ask about HCAI — e.g., fairness in model design")  # Input box for user queries on HCAI topics
 if user_text:  # If user has entered text
     # Safety screen first
@@ -57,11 +82,19 @@ if user_text:  # If user has entered text
                 st.warning(message)  # Display safety warning
             st.stop()  # Halt further processing to maintain safe interaction
 
+        ####################################################################
+        # Append user message to chat history and log the event for 
+        # transparency and accountability in interactions
+        ####################################################################
         with st.chat_message("user"):  # Display user's message in chat
             st.markdown(user_text)  # Render user input in markdown
         st.session_state.history.append({"role": "user", "content": user_text})  # Append user message to history
         log_event("user", user_text, explain, selected if selected != "(none)" else None)  # Log user input event with context
 
+        ####################################################################
+        # Attempt to get AI response using the configured model client,
+        # fallback to demo mode if API key is missing to maintain usability
+        ####################################################################
         # Call model (or fallback demo if no key)
         client = get_client()  # Initialize API client for language model
         if client is None:  # If no API key or client is unavailable
