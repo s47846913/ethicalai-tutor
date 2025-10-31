@@ -52,17 +52,17 @@ user_text = st.chat_input("Ask about HCAI — e.g., fairness in model design")  
 if user_text:  # If user has entered text
     # Safety screen first
         is_safe, message = basic_screen(user_text)  # Run safety checks to prevent harmful or unethical inputs
-if not is_safe:  # If input fails safety screening
-        with st.chat_message("assistant"):  # Show warning message as assistant response
-            st.warning(message)  # Display safety warning
-        st.stop()  # Halt further processing to maintain safe interaction
+        if not is_safe:  # If input fails safety screening
+            with st.chat_message("assistant"):  # Show warning message as assistant response
+                st.warning(message)  # Display safety warning
+            st.stop()  # Halt further processing to maintain safe interaction
 
-with st.chat_message("user"):  # Display user's message in chat
-        st.markdown(user_text)  # Render user input in markdown
+        with st.chat_message("user"):  # Display user's message in chat
+            st.markdown(user_text)  # Render user input in markdown
         st.session_state.history.append({"role": "user", "content": user_text})  # Append user message to history
         log_event("user", user_text, explain, selected if selected != "(none)" else None)  # Log user input event with context
 
-    # Call model (or fallback demo if no key)
+        # Call model (or fallback demo if no key)
         client = get_client()  # Initialize API client for language model
         if client is None:  # If no API key or client is unavailable
             fallback = (
